@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace ApiPrimeiroSimulado.Models
 {
-    public class Produtos
+    public class ProdutoModel
     {
         [Key]
         public int idProduto { get; set; }
@@ -15,9 +15,9 @@ namespace ApiPrimeiroSimulado.Models
 
         public int quantidadeProduto { get; set; }
 
-       public DateTime dataCadastro { get; set; }
+       public DateTime dataCadastro { get; set; } = DateTime.Now;
 
         [JsonIgnore]
-        public ICollection<Transacoes>? Transacoes { get; set; }
+        public ICollection<TransacaoModel>? Transacoes { get; set; }
     }
 }

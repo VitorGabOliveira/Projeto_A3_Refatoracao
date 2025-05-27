@@ -10,15 +10,15 @@ public class AppDbContext: DbContext
     { 
        
     }
-    public DbSet<Produtos> Produtos { get; set; }
-    public DbSet<Transacoes> Transacoes { get; set; }
-    public DbSet<Usuarios> Usuarios { get; set; }
+    public DbSet<ProdutoModel> Produtos { get; set; }
+    public DbSet<TransacaoModel> Transacoes { get; set; }
+    public DbSet<UsuarioModel> Usuarios { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Transacoes>()
+        modelBuilder.Entity<TransacaoModel>()
             .HasOne( t => t.produtos)
             .WithMany(p => p.Transacoes)
             .HasForeignKey(t => t.produtoId)

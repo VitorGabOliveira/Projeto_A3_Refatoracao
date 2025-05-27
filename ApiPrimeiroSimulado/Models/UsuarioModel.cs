@@ -2,7 +2,7 @@
 
 namespace ApiPrimeiroSimulado.Models
 {
-    public class Usuarios
+    public class UsuarioModel
     {
         [Key]
         public int idUsuario { get; set; }

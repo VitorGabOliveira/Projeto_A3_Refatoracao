@@ -19,14 +19,14 @@ public class TransacoesController : ControllerBase
 
     [HttpGet]
 
-    public async Task<ActionResult<IEnumerable<Transacoes>>> GetTransacoes()
+    public async Task<ActionResult<IEnumerable<TransacaoModel>>> GetTransacoes()
     {
         return await _context.Transacoes.ToListAsync();
     }
 
     [HttpGet("{id}")]
 
-    public async Task<ActionResult<Transacoes>> GetTransacoes(int id)
+    public async Task<ActionResult<TransacaoModel>> GetTransacoes(int id)
     {
         var transacao = await _context.Transacoes.FindAsync(id);
 
@@ -41,7 +41,7 @@ public class TransacoesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<Transacoes>> CreateTransacoes(Transacoes transacao)
+    public async Task<ActionResult<TransacaoModel>> CreateTransacoes(TransacaoModel transacao)
     {
         var produto = await _context.Produtos.FindAsync(transacao.produtoId);
         if (produto == null)
@@ -100,7 +100,7 @@ public class TransacoesController : ControllerBase
 
     [HttpPut("{id}")]
 
-    public async Task<IActionResult> UpdateTransacoes(int id, Transacoes transacao)
+    public async Task<IActionResult> UpdateTransacoes(int id, TransacaoModel transacao)
     {
         if (id != transacao.idTransacao)
         {

@@ -1,23 +1,22 @@
 using ApiPrimeiroSimulado.Data;
 using Microsoft.EntityFrameworkCore;
+using ApiPrimeiroSimulado.Services.Produto;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Configuração do banco de dados
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddDbContext<AppDbContext>(option =>
-{
-    option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+// Injeção de dependência do service
+builder.Services.AddScoped<IProdutoService, ProdutoService>();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -25,7 +24,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

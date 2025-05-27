@@ -19,14 +19,14 @@ namespace ApiPrimeiroSimulado.Controllers
 
         [HttpGet]
 
-        public async Task<ActionResult<IEnumerable<Usuarios>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<UsuarioModel>>> GetUsuarios()
         {
             return await _context.Usuarios.ToListAsync();
         }
 
         [HttpGet("{id}")]
 
-        public async Task<ActionResult<Usuarios>> GetUsuarios(int id)
+        public async Task<ActionResult<UsuarioModel>> GetUsuarios(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
 
@@ -42,7 +42,7 @@ namespace ApiPrimeiroSimulado.Controllers
 
         [HttpPost]
 
-        public async Task<ActionResult<Usuarios>> CreateUsuarios(Usuarios usuario)
+        public async Task<ActionResult<UsuarioModel>> CreateUsuarios(UsuarioModel usuario)
         {
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
@@ -51,7 +51,7 @@ namespace ApiPrimeiroSimulado.Controllers
 
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> UpdateUsuarios(int id, Usuarios usuario)
+        public async Task<IActionResult> UpdateUsuarios(int id, UsuarioModel usuario)
         {
             if (id != usuario.idUsuario)
             {
