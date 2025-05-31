@@ -1,8 +1,6 @@
-﻿using ApiPrimeiroSimulado.Data;
-using ApiPrimeiroSimulado.Models;
-using Microsoft.AspNetCore.Http;
+﻿using ApiPrimeiroSimulado.Models;
+using ApiPrimeiroSimulado.Services.Usuario;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiPrimeiroSimulado.Controllers
 {
@@ -10,97 +8,48 @@ namespace ApiPrimeiroSimulado.Controllers
     [ApiController]
     public class UsuariosController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IUsuarioInterface _usuarioService;
 
-        public UsuariosController(AppDbContext context)
+        public UsuariosController(IUsuarioInterface usuarioService)
         {
-            _context = context;
+            _usuarioService = usuarioService;
         }
 
         [HttpGet]
-
-        public async Task<ActionResult<IEnumerable<UsuarioModel>>> GetUsuarios()
+        public async Task<ActionResult<ResponseModel<IEnumerable<UsuarioModel>>>> GetUsuarios()
         {
-            return await _context.Usuarios.ToListAsync();
+            return Ok(await _usuarioService.GetUsuarios());
         }
 
         [HttpGet("{id}")]
-
-        public async Task<ActionResult<UsuarioModel>> GetUsuarios(int id)
+        public async Task<ActionResult<ResponseModel<UsuarioModel>>> GetUsuario(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-
-            if (usuario == null)
-            {
-                return NotFound();
-            }
-            else
-            {
-                return Ok(usuario);
-            }
+            var response = await _usuarioService.GetUsuarioById(id);
+            if (!response.status) return NotFound(response);
+            return Ok(response);
         }
 
         [HttpPost]
-
-        public async Task<ActionResult<UsuarioModel>> CreateUsuarios(UsuarioModel usuario)
+        public async Task<ActionResult<ResponseModel<UsuarioModel>>> CreateUsuario(UsuarioModel usuario)
         {
-            _context.Usuarios.Add(usuario);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.idUsuario }, usuario);
+            var response = await _usuarioService.PostUsuario(usuario);
+            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.idUsuario }, response);
         }
 
         [HttpPut("{id}")]
-
-        public async Task<IActionResult> UpdateUsuarios(int id, UsuarioModel usuario)
+        public async Task<ActionResult<ResponseModel<string>>> UpdateUsuario(int id, UsuarioModel usuario)
         {
-            if (id != usuario.idUsuario)
-            {
-                return BadRequest("O id informado não foi encontrado");
-            }
-            _context.Entry(usuario).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                if (!UsuarioExist(id))
-                {
-                    return NotFound(ex);
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return NoContent();
+            var response = await _usuarioService.PutUsuario(id, usuario);
+            if (!response.status) return BadRequest(response);
+            return Ok(response);
         }
 
         [HttpDelete("{id}")]
-
-        public async Task<IActionResult> DeleteUsuarios(int id)
+        public async Task<ActionResult<ResponseModel<string>>> DeleteUsuario(int id)
         {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null)
-            {
-                return NotFound();
-            }
-            try
-            {
-                _context.Usuarios.Remove(usuario);
-                await _context.SaveChangesAsync();
-                return NoContent();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
-
-        private bool UsuarioExist(int id)
-        {
-            return _context.Usuarios.Any(p => p.idUsuario == id);
+            var response = await _usuarioService.DeleteUsuario(id);
+            if (!response.status) return NotFound(response);
+            return Ok(response);
         }
     }
 }
