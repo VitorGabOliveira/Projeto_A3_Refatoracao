@@ -1,7 +1,7 @@
 ﻿using ApiPrimeiroSimulado.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ApiPrimeiroSimulado.Services.UsuarioController;
+namespace ApiPrimeiroSimulado.Services.Usuario;
 
 public class UsuarioService: IUsuarioInterface
 {

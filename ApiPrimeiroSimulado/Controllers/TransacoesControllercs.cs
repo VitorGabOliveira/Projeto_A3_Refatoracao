@@ -1,8 +1,7 @@
-﻿using ApiPrimeiroSimulado.Data;
+﻿using ApiPrimeiroSimulado.Dtos.Transacao;
 using ApiPrimeiroSimulado.Models;
-using Microsoft.AspNetCore.Http;
+using ApiPrimeiroSimulado.Services.Transacoes;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiPrimeiroSimulado.Controllers;
 
@@ -10,146 +9,54 @@ namespace ApiPrimeiroSimulado.Controllers;
 [ApiController]
 public class TransacoesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ITransacaoInterface _transacaoService;
 
-    public TransacoesController(AppDbContext context)
+    public TransacoesController(ITransacaoInterface transacaoService)
     {
-        _context = context;
+        _transacaoService = transacaoService;
     }
 
     [HttpGet]
-
-    public async Task<ActionResult<IEnumerable<TransacaoModel>>> GetTransacoes()
+    public async Task<ActionResult<ResponseModel<IEnumerable<TransacaoResponseDto>>>> GetAll()
     {
-        return await _context.Transacoes.ToListAsync();
+        var response = await _transacaoService.GetAllAsync();
+        return Ok(response);
     }
 
     [HttpGet("{id}")]
-
-    public async Task<ActionResult<TransacaoModel>> GetTransacoes(int id)
+    public async Task<ActionResult<ResponseModel<TransacaoResponseDto>>> GetById(int id)
     {
-        var transacao = await _context.Transacoes.FindAsync(id);
-
-        if (transacao == null)
-        {
-            return NotFound();
-        }
-        else
-        {
-            return Ok(transacao);
-        }
+        var response = await _transacaoService.GetByIdAsync(id);
+        if (!response.status)
+            return NotFound(response);
+        return Ok(response);
     }
 
     [HttpPost]
-    public async Task<ActionResult<TransacaoModel>> CreateTransacoes(TransacaoModel transacao)
+    public async Task<ActionResult<ResponseModel<TransacaoResponseDto>>> Create([FromBody] TransacaoRequestDto dto)
     {
-        var produto = await _context.Produtos.FindAsync(transacao.produtoId);
-        if (produto == null)
-            return NotFound($"Produto com id {transacao.produtoId} não encontrado.");
+        var response = await _transacaoService.CreateAsync(dto);
+        if (!response.status)
+            return BadRequest(response);
 
-        switch (transacao.tipoTransacao?.ToLowerInvariant())
-        {
-            case "compra":
-                produto.quantidadeProduto += transacao.quantidadeTransacao; 
-                break;
-
-            case "venda":
-                if (produto.quantidadeProduto < transacao.quantidadeTransacao)
-                    return BadRequest("Estoque insuficiente para realizar a venda.");
-
-                produto.quantidadeProduto -= transacao.quantidadeTransacao;
-                break;
-
-            case "ajuste":
-                produto.quantidadeProduto = transacao.quantidadeTransacao;
-                break;
-
-            default:
-                return BadRequest("Tipo de transação inválido. Use 'Compra', 'Venda' ou 'Ajuste'.");
-        }
-
-        
-        using var dbTrans = await _context.Database.BeginTransactionAsync();
-        try
-        {
-            // Atualiza o estoque do produto
-            _context.Produtos.Update(produto);
-
-            // Registra a transação
-            transacao.dataTransacao = DateTime.Now;
-            _context.Transacoes.Add(transacao);
-
-            // Persiste tudo
-            await _context.SaveChangesAsync();
-            await dbTrans.CommitAsync();
-        }
-        catch
-        {
-            await dbTrans.RollbackAsync();
-            throw;
-        }
-
-        // 4. Retorna Created com os dados da transação
-        return CreatedAtAction(
-            nameof(GetTransacoes),
-            new { id = transacao.idTransacao },
-            transacao
-        );
+        return CreatedAtAction(nameof(GetById), new { id = response.dados?.idTransacao }, response);
     }
 
-
     [HttpPut("{id}")]
-
-    public async Task<IActionResult> UpdateTransacoes(int id, TransacaoModel transacao)
+    public async Task<ActionResult<ResponseModel<string>>> Update(int id, [FromBody] TransacaoRequestDto dto)
     {
-        if (id != transacao.idTransacao)
-        {
-            return BadRequest("O id informado não foi encontrado");
-        }
-        _context.Entry(transacao).State = EntityState.Modified;
-
-        try
-        {
-            await _context.SaveChangesAsync();
-        }
-        catch (Exception ex)
-        {
-            if (!TransacaoExist(id))
-            {
-                return NotFound(ex);
-            }
-            else
-            {
-                throw;
-            }
-        }
-        return NoContent();
+        var response = await _transacaoService.UpdateAsync(id, dto);
+        if (!response.status)
+            return NotFound(response);
+        return Ok(response);
     }
 
     [HttpDelete("{id}")]
-
-    public async Task<IActionResult> DeleteTransacoes(int id)
+    public async Task<ActionResult<ResponseModel<string>>> Delete(int id)
     {
-        var transacao = await _context.Transacoes.FindAsync(id);
-        if (transacao == null)
-        {
-            return NotFound();
-        }
-        try
-        {
-            _context.Transacoes.Remove(transacao);
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
-
-    private bool TransacaoExist(int id)
-    {
-        return _context.Transacoes.Any(p => p.idTransacao == id);
+        var response = await _transacaoService.DeleteAsync(id);
+        if (!response.status)
+            return NotFound(response);
+        return Ok(response);
     }
 }
-

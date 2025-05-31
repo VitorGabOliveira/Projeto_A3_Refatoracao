@@ -6,7 +6,7 @@ namespace ApiPrimeiroSimulado.Models;
 public class TransacaoModel
 {
     [Key]
-    public int? idTransacao { get; set; }
+    public int idTransacao { get; set; }
     public int produtoId { get; set; }
     public int quantidadeTransacao { get; set; }
     public DateTime dataTransacao { get; set; } = DateTime.Now;
