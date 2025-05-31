@@ -8,11 +8,16 @@ public class UsuarioService : IUsuarioInterface
 {
     private readonly AppDbContext _context;
 
+    // O construtor recebe uma instância do AppDbContext (injeção de dependência), 
+    // que é usada para acessar o banco de dados por meio do Entity Framework Core.
     public UsuarioService(AppDbContext context)
     {
         _context = context;
     }
 
+    // O método GetUsuarios busca todos os usuários cadastrados no banco.
+    // Ele retorna um objeto do tipo ResponseModel com uma lista de usuários,
+    // além de uma mensagem e um status indicando sucesso.
     public async Task<ResponseModel<IEnumerable<UsuarioModel>>> GetUsuarios()
     {
         var usuarios = await _context.Usuarios.ToListAsync();
@@ -24,6 +29,9 @@ public class UsuarioService : IUsuarioInterface
         };
     }
 
+    // O método GetUsuarioById recebe um ID e tenta encontrar o usuário correspondente no banco.
+    // Caso não encontre, retorna uma resposta com status false e mensagem de erro.
+    // Se encontrar, retorna o usuário encontrado dentro de um ResponseModel.
     public async Task<ResponseModel<UsuarioModel>> GetUsuarioById(int id)
     {
         var usuario = await _context.Usuarios.FindAsync(id);
@@ -45,6 +53,9 @@ public class UsuarioService : IUsuarioInterface
         };
     }
 
+    // O método PostUsuario insere um novo usuário no banco de dados.
+    // Após adicionar o usuário ao contexto e salvar as alterações, 
+    // retorna um ResponseModel indicando sucesso e contendo o novo usuário.
     public async Task<ResponseModel<UsuarioModel>> PostUsuario(UsuarioModel novoUsuario)
     {
         _context.Usuarios.Add(novoUsuario);
@@ -58,6 +69,10 @@ public class UsuarioService : IUsuarioInterface
         };
     }
 
+    // O método PutUsuario atualiza um usuário existente no banco de dados.
+    // Ele primeiro verifica se o ID informado na URL corresponde ao ID do objeto recebido.
+    // Se não corresponder, retorna erro. Se corresponder, tenta atualizar o banco.
+    // Em caso de conflito de concorrência ou ID inexistente, trata a exceção adequadamente.
     public async Task<ResponseModel<string>> PutUsuario(int id, UsuarioModel usuarioAtualizado)
     {
         if (id != usuarioAtualizado.idUsuario)
@@ -95,6 +110,9 @@ public class UsuarioService : IUsuarioInterface
         }
     }
 
+    // O método DeleteUsuario remove um usuário do banco de dados com base no ID informado.
+    // Se o usuário for encontrado, ele é removido e uma resposta de sucesso é retornada.
+    // Caso contrário, é retornada uma resposta com status false e mensagem de erro.
     public async Task<ResponseModel<string>> DeleteUsuario(int id)
     {
         var usuario = await _context.Usuarios.FindAsync(id);
